@@ -1,6 +1,8 @@
 # Liberated SystemD for NixOS!
 SystemD Liberated, because unwanted surveillance is bad, actually.
 
+WARNING: USING THIS WILL TRIGGER A FULL SYSTEM REBUILD. THERE IS PROBABLY NO WAY AROUND THIS.
+
 #### *A Forward:*
 
 Firstly, the affected version of systemd that will affect your privacy is v261. Luckily, NixOS is only on v260.1 for now (which you can check [here](https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/os-specific/linux/systemd/default.nix)). However, that makes this flake harder to test, as patches for systemd to make it work with nixOS seem to be done on a versioning basis and are incompatible with newer versions. If you have a solution, or just want to contribute, please, create a pull request! We would love to have your contributions!
@@ -13,7 +15,7 @@ And finally, systemD itself has not released v261 yet. The plan for systemd-libe
 
 ## The Flake-Based Approach
 
-In your flake.nix, this will be the planned approach. This is not final, and may not work!!!
+In your flake.nix, this will be the planned approach:
 ```nix
 
 {
@@ -44,10 +46,22 @@ In your flake.nix, this will be the planned approach. This is not final, and may
       pkgs = import nixpkgs {
         inherit system;
         overlays = [ systemd-overlay ];
+        #config.allowUnfree = true;
       };
     in
     {
-      # ... , standard flake.nix. I believe this is all that is required to make it work
+      nixosConfigurations.yourhostname = nixpkgs.lib.nixosSystem {
+        
+        # ...
+
+        modules = [
+
+          { nixpkgs.pkgs = pkgs; }
+  
+          ./configuration.nix
+  
+        ];
+      };
     };
 }
 
